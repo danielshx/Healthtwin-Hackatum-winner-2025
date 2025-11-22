@@ -1,4 +1,5 @@
 import { UserProfile, DailyMetrics, AgentRecommendation, Feedback, CheckIn, Achievement } from "@/types";
+import { CoachPersonality } from "@/types/coach";
 import { generateMockMetrics, getDefaultProfile } from "./mockData";
 
 const STORAGE_KEYS = {
@@ -8,6 +9,7 @@ const STORAGE_KEYS = {
   FEEDBACK: "fittwin_feedback",
   CHECKINS: "fittwin_checkins",
   ACHIEVEMENTS: "fittwin_achievements",
+  COACH: "fittwin_coach",
 };
 
 // Profile
@@ -117,4 +119,14 @@ export function addAchievement(achievement: Achievement) {
     achievements.push(achievement);
     saveAchievements(achievements);
   }
+}
+
+// Coach Selection
+export function saveCoach(coachId: CoachPersonality) {
+  localStorage.setItem(STORAGE_KEYS.COACH, coachId);
+}
+
+export function loadCoach(): CoachPersonality {
+  const stored = localStorage.getItem(STORAGE_KEYS.COACH);
+  return (stored as CoachPersonality) || "buddy";
 }
