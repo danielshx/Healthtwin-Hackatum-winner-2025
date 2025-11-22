@@ -1,135 +1,118 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { loadMetrics } from "@/lib/storage";
 import { DailyMetrics } from "@/types";
-import { Button } from "@/components/ui/button";
+import { MobileLayout } from "@/components/MobileLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Moon, Dumbbell, Coffee, Book } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Moon, Dumbbell, Coffee, Book, Brain } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Timeline() {
-  const navigate = useNavigate();
   const [metrics, setMetrics] = useState<DailyMetrics[]>([]);
 
   useEffect(() => {
     const allMetrics = loadMetrics();
-    setMetrics(allMetrics.slice(-7)); // Last 7 days
+    setMetrics(allMetrics.slice(-7));
   }, []);
 
   const getTimeBlocks = (metric: DailyMetrics) => {
     const blocks = [];
     
-    // Sleep block
     blocks.push({
-      time: "11:00 PM - 7:00 AM",
-      type: "sleep",
+      time: "Night",
       icon: Moon,
-      label: `Sleep: ${metric.sleepHours.toFixed(1)}hrs`,
-      color: "bg-accent/20 border-accent",
+      label: `${metric.sleepHours.toFixed(1)}hrs sleep`,
+      sublabel: `${metric.sleepEfficiency.toFixed(0)}% efficiency`,
+      color: "bg-accent/10 border-l-accent",
     });
 
-    // Morning
     blocks.push({
-      time: "7:00 AM - 12:00 PM",
-      type: "morning",
+      time: "Morning",
       icon: Coffee,
-      label: "Morning routine & classes",
-      color: "bg-muted border-border",
+      label: "Classes & Study",
+      sublabel: `Energy: ${metric.energyScore}/5`,
+      color: "bg-muted border-l-border",
     });
 
-    // Workout (if any)
     if (metric.workoutMinutes > 0) {
       blocks.push({
-        time: "12:00 PM - 1:00 PM",
-        type: "workout",
+        time: "Afternoon",
         icon: Dumbbell,
-        label: `Workout: ${metric.workoutMinutes}min`,
-        color: "bg-secondary/20 border-secondary",
+        label: `${metric.workoutMinutes}min workout`,
+        sublabel: `Load: ${metric.trainingLoad.toFixed(0)}`,
+        color: "bg-secondary/10 border-l-secondary",
       });
     }
 
-    // Afternoon study
     blocks.push({
-      time: "2:00 PM - 6:00 PM",
-      type: "study",
-      icon: Book,
-      label: "Study & university",
-      color: "bg-muted border-border",
+      time: "Evening",
+      icon: metric.stressScore > 60 ? Brain : Book,
+      label: metric.stressScore > 60 ? "High stress period" : "Study session",
+      sublabel: `Stress: ${metric.stressScore.toFixed(0)}/100`,
+      color: metric.stressScore > 60 ? "bg-warning/10 border-l-warning" : "bg-muted border-l-border",
     });
 
     return blocks;
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card/50 backdrop-blur">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Timeline</h1>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto space-y-6">
-          {metrics.map((metric, idx) => (
+    <MobileLayout title="Timeline">
+      <div className="px-4 py-4 space-y-4">
+        {metrics.map((metric, idx) => {
+          const date = new Date(metric.date);
+          const isToday = idx === metrics.length - 1;
+          
+          return (
             <motion.div
               key={metric.date}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
+              transition={{ delay: idx * 0.05 }}
             >
-              <Card className="shadow-card">
-                <CardContent className="pt-6">
-                  <h3 className="font-bold mb-4">
-                    {new Date(metric.date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "short",
-                      day: "numeric",
-                    })}
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold">
+                    {isToday ? "Today" : date.toLocaleDateString("en-US", { weekday: "long" })}
                   </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    Mood {metric.moodScore}/5
+                  </Badge>
+                </div>
+              </div>
 
+              <Card className="shadow-soft">
+                <CardContent className="pt-4 pb-4">
                   <div className="space-y-3">
                     {getTimeBlocks(metric).map((block, blockIdx) => {
                       const Icon = block.icon;
                       return (
                         <div
                           key={blockIdx}
-                          className={`flex items-start gap-4 p-4 rounded-xl border-l-4 ${block.color}`}
+                          className={`flex items-start gap-3 p-3 rounded-lg border-l-4 ${block.color}`}
                         >
-                          <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center shrink-0">
-                            <Icon className="w-5 h-5" />
+                          <div className="w-9 h-9 rounded-full bg-background flex items-center justify-center shrink-0">
+                            <Icon className="w-4 h-4" />
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">{block.time}</p>
-                            <p className="font-medium">{block.label}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground">{block.time}</p>
+                            <p className="font-medium text-sm">{block.label}</p>
+                            <p className="text-xs text-muted-foreground">{block.sublabel}</p>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-
-                  <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Stress</p>
-                      <p className="text-lg font-bold">{metric.stressScore.toFixed(0)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Mood</p>
-                      <p className="text-lg font-bold">{metric.moodScore}/5</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Energy</p>
-                      <p className="text-lg font-bold">{metric.energyScore}/5</p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </div>
+    </MobileLayout>
   );
 }
