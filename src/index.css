@@ -117,4 +117,31 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-specific styles */
+  @supports (padding: max(0px)) {
+    .safe-area-top {
+      padding-top: max(0px, env(safe-area-inset-top));
+    }
+    .safe-area-bottom {
+      padding-bottom: max(0px, env(safe-area-inset-bottom));
+    }
+    .safe-area-left {
+      padding-left: max(0px, env(safe-area-inset-left));
+    }
+    .safe-area-right {
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+
+  /* Prevent scrolling on body when app is installed */
+  html.pwa body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Touch optimization */
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
 }

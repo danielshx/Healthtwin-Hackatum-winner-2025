@@ -11,6 +11,7 @@ import Insights from "./pages/Insights";
 import Coach from "./pages/Coach";
 import Simulate from "./pages/Simulate";
 import Social from "./pages/Social";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/coach" element={<Coach />} />
           <Route path="/simulate" element={<Simulate />} />
           <Route path="/social" element={<Social />} />
+          <Route path="/install" element={<Install />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
